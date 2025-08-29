@@ -1,0 +1,12 @@
+// Required
+// all.scss 或 custom.scss
+@import "~bootstrap/scss/functions";  // 先匯入 function
+@import "@/assets/helpers/_variables";
+@import "~bootstrap/scss/bootstrap";   // 匯入完整 bootstrap，包含變數、mixins、root 等
+
+// Custom.scss
+// Option A: Include all of Bootstrap
+
+// Include any default variable overrides here (though functions won't be available)
+
+@import "~bootstrap/scss/bootstrap";
