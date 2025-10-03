@@ -55,7 +55,7 @@ const routes = [
 // 建立 router
 
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHashHistory('/to-do-shop/'),
   linkActiveClass: 'active',
   routes
 })
