@@ -129,10 +129,6 @@ export default {
 
     methods:{
        confirmProduct() {
-          if (!this.tempProduct.image) {
-            alert('請先上傳圖片或輸入圖片網址');
-            return; // 阻止送出
-          }
           this.$emit('update-product', this.tempProduct)
           this.hideModal()
         }, // 其他 methods 如 uploadFile, showModal, hideModal...
@@ -154,7 +150,7 @@ export default {
         const formData = new FormData()
         formData.append('file-to-upload', uploadFile)
         try {
-          const token =  Cookies.get('hexToken') // 同上
+          const token =  Cookies.get('token') // 同上
           const apiPath = 'yusei-api'
           const res = await axios.post(
             `https://vue3-course-api.hexschool.io/api/${apiPath}/admin/upload`,
@@ -169,7 +165,7 @@ export default {
           if (res.data.success) {
             console.log('檔案上傳成功', res.data.imageUrl)
             // 將上傳結果存到 tempProduct.image
-            this.tempProduct.image = res.data.imageUrl
+            this.tempProduct.imageUrl = res.data.imageUrl
           } else {
             alert(res.data.message || '檔案上傳失敗')
             console.warn(res.data)  // 印出回傳內容方便除錯

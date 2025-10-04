@@ -1,25 +1,25 @@
 <template>
   <table class="table mt-4">
     <thead>
-    <tr>
-      <th>購買時間</th>
-      <th>Email</th>
-      <th>購買款項</th>
-      <th>應付金額</th>
-      <th>是否付款</th>
-      <th>編輯</th>
-    </tr>
+      <tr>
+        <th>購買時間</th>
+        <th>Email</th>
+        <th>購買款項</th>
+        <th>應付金額</th>
+        <th>是否付款</th>
+        <th>編輯</th>
+      </tr>
     </thead>
-    <VueLoading  v-model:active="isLoading"/>
+    <VueLoading v-model:active="isLoading" />
     <tbody>
       <template v-for="(item, key) in orders" :key="key">
-        <tr v-if="orders.length"
-            :class="{'text-secondary': !item.is_paid}">
-          <td>{{ item.create_at ? $filters.date(item.create_at) : '-' }}</td>
+        <tr v-if="orders.length" :class="{ 'text-secondary': !item.is_paid }">
+          <td>{{ formatDate(item.create_at) }}</td>
           <td>
             <span v-if="item.user">{{ item.user.email }}</span>
-            <span v-else>-</span> <!-- 如果 user 為 undefined 顯示 "-" -->
-        </td>
+            <span v-else>-</span>
+            <!-- 如果 user 為 undefined 顯示 "-" -->
+          </td>
           <td>
             <ul class="list-unstyled">
               <li v-for="(product, i) in item.products" :key="i">
@@ -28,12 +28,16 @@
               </li>
             </ul>
           </td>
-          <td class="text-right">{{ item.total ?? '-' }}</td>
+          <td class="text-right">{{ item.total ?? "-" }}</td>
           <td>
             <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" :id="`paidSwitch${item.id}`"
-                     v-model="item.is_paid"
-                     @change="updatePaid(item)">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                :id="`paidSwitch${item.id}`"
+                v-model="item.is_paid"
+                @change="updatePaid(item)"
+              />
               <label class="form-check-label" :for="`paidSwitch${item.id}`">
                 <span v-if="item.is_paid">已付款</span>
                 <span v-else>未付款</span>
@@ -42,27 +46,39 @@
           </td>
           <td>
             <div class="btn-group">
-              <button class="btn btn-outline-primary btn-sm"
-                      @click="openModal(false, item)">檢視</button>
-              <button class="btn btn-outline-danger btn-sm"
-                      @click="openDelOrderModal(item)"
-              >刪除</button>
+              <button
+                class="btn btn-outline-primary btn-sm"
+                @click="openModal(false, item)"
+              >
+                檢視
+              </button>
+              <button
+                class="btn btn-outline-danger btn-sm"
+                @click="openDelOrderModal(item)"
+              >
+                刪除
+              </button>
             </div>
           </td>
         </tr>
       </template>
     </tbody>
   </table>
-  <OrderModal :order="tempOrder"
-              ref="orderModal" @update-paid="updatePaid"></OrderModal>
+  <OrderModal
+    :order="tempOrder"
+    ref="orderModal"
+    @update-paid="updatePaid"
+  ></OrderModal>
   <DelModal :item="tempOrder" ref="delModal" @del-item="delOrder"></DelModal>
   <Pagination :pages="pagination" @emit-pages="getOrders"></Pagination>
 </template>
 
 <script>
-import DelModal from '../components/DelModals.vue';
-import OrderModal from '../components/orderModals.vue';
-import Pagination from '../components/MyPagination.vue';
+import DelModal from "../components/DelModals.vue";
+import OrderModal from "../components/orderModals.vue";
+import Pagination from "../components/MyPagination.vue";
+import axios from "axios";
+import Cookies from "js-cookie";
 
 export default {
   data() {
@@ -81,17 +97,33 @@ export default {
     OrderModal,
   },
   methods: {
-    getOrders(currentPage = 1) {
-      this.currentPage = currentPage;
-      const url = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/admin/orders?page=${currentPage}`;
-      this.isLoading = true;
-      this.$http.get(url, this.tempProduct).then((response) => {
-        this.orders = response.data.orders;
-        this.pagination = response.data.pagination;
-        this.isLoading = false;
-        console.log(response);
-      });
+    async getOrders(page = 1) {
+      const token = Cookies.get("token") || ""; // 取 token
+      if (!token) {
+        alert("尚未登入，請先登入");
+        return;
+      }
+
+      try {
+        const url = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/admin/orders?page=${page}`;
+        const res = await axios.get(url, {
+          headers: { Authorization: token },
+        });
+
+        console.log(res.data); // 印出完整回傳方便除錯
+
+        if (res.data.success) {
+          this.orders = res.data.orders;
+          this.pagination = res.data.pagination; // 分頁資料
+        } else {
+          alert(res.data.message || "取得訂單失敗");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("網路錯誤，請稍後再試");
+      }
     },
+
     openModal(isNew, item) {
       this.tempOrder = { ...item };
       this.isNew = false;
@@ -112,7 +144,7 @@ export default {
       this.$http.put(api, { data: paid }).then((response) => {
         this.isLoading = false;
         this.getOrders(this.currentPage);
-        this.$httpMessageState(response, '更新付款狀態');
+        this.$httpMessageState(response, "更新付款狀態");
       });
     },
     delOrder() {
@@ -124,6 +156,11 @@ export default {
         delComponent.hideModal();
         this.getOrders(this.currentPage);
       });
+    },
+    formatDate(time) {
+      if (!time) return "-";
+      const date = new Date(time * 1000);
+      return date.toLocaleDateString();
     },
   },
   created() {

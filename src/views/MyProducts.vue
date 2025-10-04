@@ -71,9 +71,8 @@ export default {
           alert('尚未登入，請先登入');
           return;
         }
-        this.isLoading = true
         try {
-          const res = await axios.get(`https://vue3-course-api.hexschool.io/api/${this.apiPath}/admin/products/?page=${page}`, {
+          const res = await axios.get(`${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/admin/products/?page=${page}`, {
             headers: { Authorization: token }
           });
           console.log(res.data)
@@ -86,17 +85,11 @@ export default {
         } catch (err) {
           console.error(err);
           alert('網路錯誤');
-        }finally {
-          this.isLoading = false;
         }
       },
       updateProduct(item) {
         this.tempProduct = item;
         const token = Cookies.get('token') || '';
-        if (!token) {
-          alert('尚未登入');
-          return;
-        }
 
         let api = `https://vue3-course-api.hexschool.io/api/yusei-api/admin/product`;
         let method = 'post';

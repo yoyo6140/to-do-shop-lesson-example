@@ -15,7 +15,7 @@
           <tr v-for="item in products" :key="item.id">
             <td style="width: 200px">
               <div style="height: 100px; background-size: cover; background-position: center"
-                   :style="{ backgroundImage: `url(${item.imageUrl || '/images/default.png'})` }"></div>
+                   :style="{ backgroundImage: `url(${item.imageUrl })` }"></div>
             </td>
             <td><a href="#" class="text-dark">{{ item.title }}</a></td>
             <td>
@@ -205,12 +205,11 @@ export default {
   },
   methods: {
     getProducts() {
-      const url = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/products/all`;
-      this.isLoading = true;
+      const url = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/products`;
+      console.log('API URL:', url);
       this.$http.get(url).then((response) => {
         this.products = response.data.products;
         console.log('products:', response);
-        this.isLoading = false;
       });
     },
     getProduct(id) {
@@ -232,16 +231,13 @@ export default {
     },
     getCart() {
       const url = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/cart`;
-      this.isLoading = true;
       this.$http.get(url).then((response) => {
-        console.log(response);
+        console.log('@@@',response);
         this.cart = response.data.data;
-        this.isLoading = false;
       });
     },
     updateCart(item) {
       const url = `${process.env.VUE_APP_API}api/${process.env.VUE_APP_PATH}/cart/${item.id}`;
-      this.isLoading = true;
       this.status.loadingItem = item.id;
       const cart = {
         product_id: item.product_id,
@@ -272,7 +268,6 @@ export default {
         this.$httpMessageState(response, '移除購物車品項');
         this.status.loadingItem = '';
         this.getCart();
-        this.isLoading = false;
       });
     },
 

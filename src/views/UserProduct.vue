@@ -12,7 +12,7 @@
         <div>{{ product.content }}</div>
         <div>{{ product.description }}</div>
         <img 
-            :src="product.imageUrl ? product.imageUrl : '/images/default.png'" 
+            :src="product.imageUrl " 
             alt="商品圖片" 
             class="img-fluid mb-3"
             />

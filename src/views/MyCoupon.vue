@@ -89,7 +89,7 @@ export default {
     async getCoupons() {
       this.isLoading = true;
       const apiPath = 'yusei-api';
-      const token = Cookies.get('hexToken'); // 取得 token
+      const token = Cookies.get('token'); // 取得 token
 
       if (!token) {
         alert('尚未登入，請先登入');
